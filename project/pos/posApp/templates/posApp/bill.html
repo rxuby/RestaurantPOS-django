@@ -1,0 +1,112 @@
+{% extends "posApp/base.html" %} {% block pageContent %}
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">รายการบิล</h4>
+            <div class="text-start">
+                    <button class="btn btn-primary bg-gradient btn-sm rounded-0" id="create_new"><i class="mdi mdi-plus"></i><span>เพิ่มบิล</span></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <colgroup>
+                    <col width="30%">
+                    <col width="30%">
+                    <col width="40%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="text-center py-1">ชื่อโต๊ะ</th>
+                        <th class="text-center py-1">เวลาที่สร้างบิล</th>
+                        <th class="text-center py-1">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill in bills %}
+                    <tr>
+                        <td class="px-2 py-1 text-center">{{ bill.sale_id.tablename }}</td>
+                        <td class="px-2 py-1 text-center">{{ bill.date|date:"d/m/Y H:i" }}</td>
+                        <td class="px-2 py-1 text-center">
+                            <form method="post" action="{% url 'manage_bill' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value="{{ bill.sale_id.pk }}">
+                                <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--light mdc-ripple-upgraded edit-data" type="submit"  title="Edit">
+                                    <i class="material-icons mdc-button__icon">edit</i>
+                            </form>
+                            <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--danger mdc-ripple-upgraded delete-data" type="button" data-id="{{ bill.pk }}" title="Delete">
+                                <i class="material-icons mdc-button__icon">deleteoutline</i>
+                            </button>
+                            <form action="{% url 'manage_bill_checkout' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value="{{ bill.id }}">
+                                <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--danger mdc-ripple-upgraded delete-data bg-success" type="submit">
+                                  <i class="material-icons mdc-button__icon">checkout</i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock pageContent %} {% block ScriptBlock %}
+<script>
+    $(function() {
+        $('#create_new').click(function() {
+            //uni_modal("Add New Product", "{% url 'createbill' %}")
+            fetch("{% url 'createbill' %}")
+            .then(response => response.json())
+            .then(data => {
+            // do something with the data
+            console.log(data);
+            location.reload();
+        })
+        .catch(error => console.error(error));
+        })
+        $('.edit-data').click(function() {
+            fetch("{% url 'manage_bill' %}?id=" + $(this).attr('data-id'))
+        })
+        $('.delete-data').click(function() {
+            _conf("Are you sure to delete this bill?", "delete_bill", [$(this).attr('data-id')])
+        })
+
+        $('#uni_modal').on('shown.bs.modal', function(a) {
+            $('#category_id').select2({
+                placeholder: "Please Select Category Here",
+                width: '100%',
+                dropdownParent: $('#uni_modal')
+            })
+        })
+    })
+
+    function delete_bill($id) {
+        $.ajax({
+            headers: {
+                "X-CSRFToken": '{{csrf_token}}'
+            },
+            url: "{% url 'delete_bill' %}",
+            method: "POST",
+            data: {
+                id: $id
+            },
+            dataType: "json",
+            error: err => {
+                console.log(err)
+            },
+            success: function(resp) {
+                if (typeof resp == 'object' && resp.status == 'success') {
+                    location.reload();
+                } else {
+                }
+            }
+        })
+    }
+    
+</script>
+{% endblock ScriptBlock %}

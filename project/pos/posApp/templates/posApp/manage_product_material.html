@@ -1,0 +1,90 @@
+{% extends "posApp/base.html" %} {% block pageContent %}
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">เพิ่มสินค้าที่ใช้วัตถุดิบ</h4>
+        </div>
+    </div>
+</div>
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card">
+        <form method="POST" action="{% url 'link_product_material' %}">
+            {% csrf_token %}
+            <fieldset>
+                <legend>Add Products</legend>
+                <div class="row align-items-end">
+                    <div class="col-lg-5 col-md-5 col-sm-12">
+                        <div class="form-group mb-3">
+                            <label for="product-id">Select Product</label>
+                            <select id="product-id" class="form-select form-select-sm" name="product_id">
+                                <option value="" disabled selected></option>
+                                {% for product in products %}
+                                    <option value="{{ product.pk }}">{{ product }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-5 col-md-12">
+                        <div class="form-group mb-3">
+                            <label for="product-qty">Qty</label>
+                            <input type="number" class="form-control form-control-sm text-center" step="any" name="material_qty" value="1">
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-2 col-md-12">
+                        <div class="form-group mb-3">
+                            <input type="hidden" name="id" value="{{id}}">
+                            <button class="btn btn-light btn-sm bg-gradient border rounded-0 text-start" type="submit"><i class="mdi mdi-plus"></i> Add Item</button>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+            <fieldset>
+                <div class="d-flex w-180" id="POS-field">
+                    <div class="col-12 bg-gradient bg-light border h-100">
+                        <table class="table table-bordered">
+                            <colgroup>
+                                <col width="10%">
+                                <col width="40%">
+                                <col width="20%">
+                                <col width="20%">
+                            </colgroup>
+                            <thead>
+                                <tr class="bg-dark bg-gradient bg-opacity-50 text-light">
+                                    <th class="py-1 px-2 text-center  text-light">#</th>
+                                    <th class="py-1 px-2 text-center  text-light">Product</th>
+                                    <th class="py-1 px-2 text-center  text-light">quantity</th>
+                                    <th class="py-1 px-2 text-center  text-light">action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pm in PM %}
+                                    <tr>
+                                        <td class="px-2 py-1 text-start">{{ pm.id }}</td>
+                                        <td class="px-2 py-1 text-center">{{ pm.product.name }}</td>
+                                        <td class="px-2 py-1 text-start">{{ pm.quantity }}</td>
+                                        <td class="px-2 py-1 text-center">
+                                            <form method="post" action="{% url 'unlink_product_material' %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="id" value="{{id}}">
+                                                <input type="hidden" name="pm_id" value="{{pm.id}}">
+                                                <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--danger mdc-ripple-upgraded delete-data" type="submit" title="Delete">
+                                                    <i class="material-icons mdc-button__icon">deleteoutline</i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="row">
+                <div class="col-md-12 text-end">
+                    <a href="{% url 'material' %}"><button class="btn btn-primary btn-sm rounded-0" type="button" id="back"><i class="mdi mdi-save"></i> Back</button></a>
+                </div>
+            </div>
+    </div>
+</div>
+{% endblock pageContent %}
